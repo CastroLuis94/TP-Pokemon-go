@@ -211,13 +211,13 @@
 \tadOtrasOperaciones
 \tadAlinearFunciones{IndiceDeRareza}
 
-\tadOperacion{IndiceDeRareza}{pokemonGO/pg,pokemon/p}{nat}{}
+\tadOperacion{IndiceDeRareza}{pokemonGO/pg,pokemon/p}{nat}{p $in$ pokesalvajes(pg)}
 \tadOperacion{jugadores}{pokemonGO/pg}{conj(jugadores)}{}
 \tadOperacion{haypokemon}{pokemonGO/pg, posicion/p}{bool}{}
 \tadOperacion{existeUnPoke}{diccionario(pokemon,conj(posicion)),conj(posicion), posicion/p}{bool}{}
 \tadOperacion{pokemonenpos}{pokemonGO/pg, posicion/p}{pokemon}{ p $\in$ posiciones(mapa(pg)) \land haypokemon(pg,p)}
 \tadOperacion{pokeenposaux}{pokemonGO/pg, conjunto(pokemon)/cp, posicion/p}{pokemon}{ vacio(claves)== false}
-\tadOperacion{conjuntoPokemonEnPos}{conjunto(posicion)/cpos, pokemonGO/pg}{multiconjunto(pokemon)}{}
+\tadOperacion{conjuntoPokemonEnPos}{conj(posicion)/cpos, pokemonGO/pg}{multiconj(pokemon)}{}
 \tadOperacion{algunoLlegaADiez}{conjunto(posicion)/cp, pokemonGO/pg,  posicion/p}{bool}{ cpos \cup posiciones(mapa(pg)) $\land$ p $\in$ posiciones(mapa(pg))}
 \tadOperacion{LlegaADiez}{conjunto(posicion)/cpos , conjunto(pokemon)/cp, posicion/p}{conjunto(posiciones)}{cpos \subseteq posiciones(mapa(pg)) $\land$ p $\in$ posiciones(mapa(pg))}
 
