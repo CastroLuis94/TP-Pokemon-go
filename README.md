@@ -30,7 +30,7 @@
 \tadAxiomas[\paratodo{nat}{n, m, p}]
 \tadAlinearAxiomas{restaEntera(n,m)}
 
-\tadAxioma{restaEntera(n,m)}{\IF (n == 0) THEN m ELSE {\IF (n == 0) THEN m ELSE restaEntera(prev(n), prev(m)) FI} FI} 
+\tadAxioma{restaEntera(n,m)}{\IF (n == 0) THEN m ELSE {\IF (m == 0) THEN n ELSE restaEntera(prev(n), prev(m)) FI} FI} 
 
 \vskip12pt
 
@@ -64,9 +64,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\tadAxiomas[\paratodo{nat}{n, m, p, q} \paratodo{posicion}{a, b}]
+\tadAxiomas[\paratodo{nat}{n, m, p, q}, \paratodo{posicion}{a, b}]
 \tadAlinearAxiomas{restaEntera(n,m)}
-\tadAxioma{distancia(a,b)}{raiz((restaEntera($\Pi_1$(a), $\Pi_1$(b)))**2) + ((restaEntera($\Pi_2$(a), $\Pi_2$(b)))**2))}
+\tadAxioma{distancia(a,b)}{raiz(((restaEntera($\Pi_1$(a), $\Pi_1$(b)))**2) + ((restaEntera($\Pi_2$(a), $\Pi_2$(b)))**2))}
 
 \end{tad}
 
@@ -78,7 +78,7 @@
 \section{TAD \tadNombre{Mapa}}
 
 \begin{tad}{\tadNombre{Mapa}}
-\tadIgualdadObservacional{m}{m'}{mapa}{($\forall$ p:posicion)((p $\in$ posiciones(m)) == (p $\in$ posiciones(m'))) $\land$ ($\forall$ p:posicion)(p $\in$ posiciones(m)) $\impluego$ conectadas(m,p) == conectadas(m',p)}
+\tadIgualdadObservacional{m}{m'}{mapa}{($\forall$ p:posicion)((p $\in$ posiciones(m)) == (p $\in$ posiciones(m'))) $\land$ ($\forall$ p:posicion)((p $\in$ posiciones(m)) $\impluego$ conectadas(m,p) == conectadas(m',p))}
 
 \tadGeneros{mapa}
 \tadExporta{mapa, generadores, observadores, otras operaciones}
@@ -112,7 +112,7 @@
 \tadOperacion{caminosRecursivos}{mapa/m,conj(posicion)cp, conj(posicion)/res}{conj(posicion)}{ cp $\subset$ posiciones(m)}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tadAxiomas[\paratodo{mapa}{m} \paratodo{nat}{n, m} \paratodo{posicion}{p,q,p'} \paratodo{conj(posicion)}{cp, cm, cq}]
+\tadAxiomas[\paratodo{mapa}{m}, \paratodo{nat}{n, m}, \paratodo{posicion}{p,q,p'}, \paratodo{conj(posicion)}{cp, cm, cq}]
 
 \tadAlinearAxiomas{conectadas(agConexion(m,p,q), p')}
 
@@ -133,7 +133,7 @@
 % OO caminos
 \tadAlinearAxiomas{caminos(m,p)}
 \tadAxioma{Caminos(m,p)}
-{CaminosAux(m, p, \textbf{vacio}) - p}
+{CaminosAux(m, p, \textbf{vacio}) - \{p\}}
 \vskip12pt
 
 % OO caminosAux
@@ -141,7 +141,7 @@
 \vskip12pt
 
 % OO caminosRecursivos
-\tadAxioma{caminosRecursivos(m, cp, res  )}{\IF vacio? cp THEN res ELSE CaminosAux(m, dameUno(cp), res ) $\cup$ caminosRecursivos(m, sinUno(cp), res) FI} 
+\tadAxioma{caminosRecursivos(m, cp, res  )}{\IF vacio? (cp) THEN res ELSE CaminosAux(m, dameUno(cp), res ) $\cup$ caminosRecursivos(m, sinUno(cp), res) FI} 
 
 
 
@@ -172,10 +172,11 @@
 \tadObservadores
 \tadAlinearFunciones{pokesalvaje}
 
-\tadOperacion{jugConectados}{pokemonGO/pg}{conj(jugadores)}{}
-\tadOperacion{jugDesconectados}{pokemonGO/pg}{conj(jugadores)}{}
+\tadOperacion{jugConectados}{pokemonGO/pg}{conj(jugador)}{}
+\tadOperacion{jugDesconectados}{pokemonGO/pg}{conj(jugador)}{}
+\tadOperacion{ex-Jugadores}{pokemonGO/pg}{conj(jugador)}{}
 \tadOperacion{mapa}{pokemonGO}{mapa}{}
-\tadOperacion{pokesalvajes}{pokemonGO/pg}{dicc(pokemon, conj(posiciones))}{}
+\tadOperacion{pokesalvajes}{pokemonGO/pg}{dicc(pokemon, conj(posicion))}{}
 \tadOperacion{capturados}{pokemonGO/pg, jugador/j}{multiconj(pokemon)}{j $\in$ jugadores(pg)}
 \tadOperacion{posicion actual}{pokemonGO/pg, jugador/j}{posicion}{j $\in$ jugadores(pg)}
 \tadOperacion{sanciones}{pokemonGO/pg, jugador/j}{nat}{j $\in$ jugadores(pg)}
@@ -189,10 +190,10 @@
 
 \tadOperacion{nvoJuego}{mapa}{pokemonGO}{}
 
-\tadOperacion{agJugador}{pokemonGO/pg, jugador/j, posicion/p }{pokemonGO}{p $\in$ posiciones(mapa(pg)) $\land$ j $\notin$ jugadores(pg) }
+\tadOperacion{agJugador}{pokemonGO/pg, jugador/j, posicion/p }{pokemonGO}{p $\in$ posiciones(mapa(pg)) $\land$ j $\notin$ jugadores(pg) $\cup$ ex-Jugadores(pg) }
 
 
-\tadOperacion{agPokemon}{pokemonGO/pg, pokemon/p, posicion/a}{pokemonGO}{ a $\in$ posiciones(mapa(pg)) $\land$ (($\forall$ b: posicion, b $\in$ significados(pokesalvajes(pg)) ) distancia(a,b) $\geq$ 5 )))}
+\tadOperacion{agPokemon}{pokemonGO/pg, pokemon/p, posicion/a}{pokemonGO}{ a $\in$ posiciones(mapa(pg)) $\land$ ($\forall$ b: posicion)((b $\in$ significados(pokesalvajes(pg))) distancia(a,b) $\geq$ 5 )}
 
 
 %\tadOperacion{agPokemon}{pokemonGO/pg, pokemon/p, posicion/a}{pokemonGO}{ a $\in$ posiciones(mapa(pg)) $\land$(($\forall$ poke: claves(pokesalvajes(pg)))($\forall$ p: posicion $\in$ obtener(poke,pokesalvajes(pg)) distancia(a,pos) $\geq$ 5 )))}
@@ -209,39 +210,60 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \tadOtrasOperaciones
-\tadAlinearFunciones{IndiceDeRareza}
+\tadAlinearFunciones{conjuntoPokemonEnPos}
 
-\tadOperacion{IndiceDeRareza}{pokemonGO/pg,pokemon/p}{nat}{p $in$ pokesalvajes(pg)}
-\tadOperacion{jugadores}{pokemonGO/pg}{conj(jugadores)}{}
+\tadOperacion{IndiceDeRareza}{pokemonGO/pg,pokemon/p}{nat}{p $\in$ pokesalvajes(pg) $\lor$ (\exists j : jugador)j $\in$ jugadores(pg) $\land_{L}$ p $\in$ capturados(pg,j) }
+\tadOperacion{PokemonDelTipo}{pokemonGO/pg,poke/p}{nat}{p $\in$ pokesalvajes(pg) $\lor$ (\exists j : jugador)j $\in$ jugadores(pg) $\land_{L}$ p $\in$ capturados(pg,j) }
+\tadOperacion{PokemonDelTipoAux}{pokemonGO/pg,conj/cj,pokemon/poke}{nat}{p $\in$ pokesalvajes(pg) $\lor$ (\exists j : jugador)j $\in$ jugadores(pg) $\land_{L}$ p $\in$ capturados(pg,j) }
+\tadOperacion{PokemonsJug}{multiconj(pokemon)/mcp,pokemon/poke}{nat}{}
+\tadOperacion{CantPokeSalvajes}{pokemonGo/pg,conj(pokemon)/cpok}{nat}{}
+\tadOperacion{CantCapturados}{pokemonGo/pg,conj(jugador)/cpok}{nat}{}
+
+
+
+
+\tadOperacion{jugadores}{pokemonGO/pg}{conj(jugador)}{}
 \tadOperacion{haypokemon}{pokemonGO/pg, posicion/p}{bool}{}
-\tadOperacion{existeUnPoke}{diccionario(pokemon,conj(posicion)),conj(posicion), posicion/p}{bool}{}
-\tadOperacion{pokemonenpos}{pokemonGO/pg, posicion/p}{pokemon}{ p $\in$ posiciones(mapa(pg)) \land haypokemon(pg,p)}
-\tadOperacion{pokeenposaux}{pokemonGO/pg, conjunto(pokemon)/cp, posicion/p}{pokemon}{ vacio(claves)== false}
+\tadOperacion{existeUnPoke}{dicc(pokemon, conj(posicion)), conj(posicion), posicion/p}{bool}{}
+\tadOperacion{pokemonenpos}{pokemonGO/pg, posicion/p}{pokemon}{ p $\in$ posiciones(mapa(pg)) $\land$ haypokemon(pg,p)}
+\tadOperacion{pokeenposaux}{pokemonGO/pg, conj(pokemon)/cp, posicion/p}{pokemon}{ vacio?(claves)== false}
 \tadOperacion{conjuntoPokemonEnPos}{conj(posicion)/cpos, pokemonGO/pg}{multiconj(pokemon)}{}
-\tadOperacion{algunoLlegaADiez}{conjunto(posicion)/cp, pokemonGO/pg,  posicion/p}{bool}{ cpos \cup posiciones(mapa(pg)) $\land$ p $\in$ posiciones(mapa(pg))}
-\tadOperacion{LlegaADiez}{conjunto(posicion)/cpos , conjunto(pokemon)/cp, posicion/p}{conjunto(posiciones)}{cpos \subseteq posiciones(mapa(pg)) $\land$ p $\in$ posiciones(mapa(pg))}
+\tadOperacion{algunoLlegaADiez}{conj(posicion)/cp, pokemonGO/pg,  posicion/p}{bool}{ cpos $\cup$ posiciones(mapa(pg)) $\land$ p $\in$ posiciones(mapa(pg))}
+\tadOperacion{LlegaADiez}{conj(posicion)/cpos , conj(pokemon)/cp, posicion/p}{conj(posicion)}{cpos $\subseteq$ posiciones(mapa(pg)) $\land$ p $\in$ posiciones(mapa(pg))}
+\tadOperacion{jugEnRango}{pokemonGO/pg, conj(posicion)/cpos, conj(jugador)/cjug, posicion/p}{conj(jugador)}{cpos $\subseteq$ posiciones(mapa(pg)) $\land$ p $\in$ posiciones(mapa(pg)) $\land$ cjug $\subseteq$ jugadoresConectados(cp)}
+\tadOperacion{DistanciaDeCaptura}{posicion/p, conj(posicion)/cpos}{conj(posicion)}{}
+\tadOperacion{jugCapturadores}{pokemonGO/pg, conj(jugador)/cjug, posicion/p}{conj(jugador)}{cjug $\subseteq$ jugadoresConectados(pg) $\land$ p $\in$ posiciones(mapa(pg))}
+\tadOperacion{PokemonEnRango}{posicion/p, conj(posicion)/cpos, pokemonGO/pg}{pokemon}{ p $\cup$ cpos $\in$ posiciones(mapa(pg)) $\land$ ($\exists$ p':pos)(p $\in$ cpos) distancia(p',p)$\leq$2}
+\tadOperacion{buscarPoke}{conj(pokemon)/cpok, dicc(pokemon, conj(posicion))/dicc, posicion/p}{pokemon}{ p $\in$ posiciones(mapa(pg)) $\land$  p $\in$ significados(dicc)}
+\tadOperacion{significados}{dicc($\alpha$, $\beta$)/dicc}{multiconj($\betha$)}{}
+\tadOperacion{significadosaux}{dicc($\alpha$, $\beta$)/dicc, conj($\alpha$)/cla}{multiconj($\betha$)}{}
+% no se si deberia ser multiconjunto.
+\tadOperacion{PokemonsDelTipo}{pokemonGO/pg, pokemon/poke}{nat}{}
+\tadOperacion{PokeDelTipoAux}{pokemonGO/pg, conj(jugador)/cj, pokemon/poke}{nat}{}
+\tadOperacion{PokemonsJug}{multiconj(pokemon)/mcp, pokemon/poke}{nat}{}
+\tadOperacion{PokeTotal}{pokemonGO/pg}{nat}{}
+\tadOperacion{CantPokeSalvajes}{pokemonGO/pg, conj(pokemon)/cpok}{nat}{}
+\tadOperacion{CantCapturados}{pokemonGO/pg, conj(jugador)/cj}{nat}{}
 
 %Axiomas
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
-\tadAxiomas[\paratodo{pokemonGO}{pg} \paratodo{posicion}{x,y} \paratodo{jugador}{j} \paratodo{pokemon}{p}]
-\tadAlinearAxiomas{jugDesconectados(agPokemon(pg, p, a))}
+\tadAxiomas[\paratodo{pokemonGO}{pg}, \paratodo{posicion}{p,a}, \paratodo{jugador}{j,j'}, \paratodo{pokemon}{poke}]
+\tadAlinearAxiomas{jugDesconectados(agPokemon(pg, poke, a))}
 
 
-\tadAxioma{jugadores(pg)}{jugConectados(pg) \ \cup \ jugDesconectados(pg) }
-\vskip12pt
 
 %OB jugConectados
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \tadAxioma{jugConectados(NvoJuego(m))}{\textbf{vacio}}
 \tadAxioma{jugConectados(agJugador(pg,j,p))}{ Ag(j, jugConectados(pg)) }
-\tadAxioma{jugConectados(agPokemon(pg, p, a ))}{jugConectados(pg)}
+\tadAxioma{jugConectados(agPokemon(pg, poke, a ))}{jugConectados(pg)}
 \tadAxioma{jugConectados(Conectarse(pg,j, p))}{Ag(j, jugConectados(pg))}
-\tadAxioma{jugConectados(Desconectarse(pg, j))}{jugConectados(pg) - j }
-\tadAxioma{jugConectados(Moverse(pg, j, p))}{\IF (sanciones(pg, j) == 4 $\land$ (distancia(posicionActual(pg,j), p) $\geq$ 10) $\lor$  ( p $\notin$ conectadas(posicionActual(pg,j)) ) ) THEN jugConectados(pg) -\{ j\} ELSE jugConectados(pg) FI }
+\tadAxioma{jugConectados(Desconectarse(pg, j))}{jugConectados(pg) - \{j\} }
+\tadAxioma{jugConectados(Moverse(pg, j, p))}{\IF (sanciones(pg, j) == 4 $\land$ ((distancia(posicionActual(pg,j), p) $\geq$ 10) $\lor$  ( p $\notin$ caminos(mapa(pg), posicionActual(pg,j))))) THEN jugConectados(pg) -\{ j\} ELSE jugConectados(pg) FI }
 
 \vskip12pt
 
@@ -250,18 +272,33 @@
 
 \tadAxioma{jugDesconectados(NvoJuego(m))}{\textbf{vacio}}
 \tadAxioma{jugDesconectados(agJugador(pg,j,p))}{jugDesconectados(pg)}
-\tadAxioma{jugDesconectados(agPokemon(pg,p,a))}{ jugDesconectados(pg) }
-\tadAxioma{jugDesconectados(Conectarse(pg,j, p))}{ jugDesconectados(pg) -j}
+\tadAxioma{jugDesconectados(agPokemon(pg,poke,a))}{ jugDesconectados(pg) }
+\tadAxioma{jugDesconectados(Conectarse(pg,j, p))}{ jugDesconectados(pg) - \{j\}}
 \tadAxioma{jugDesconectados(Desconectarse(pg, j))}{Ag(j, jugDesconectados(pg)) }
 \tadAxioma{jugDesconectados(Moverse(pg, j, p))}{jugDesconectados(pg)}
 
 \vskip12pt
 
+
+%OB ex-Jugadores
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tadAxioma{ex-Jugadores(NvoJuego(m))}{\textbf{vacio}}
+\tadAxioma{ex-Jugadores(agJugador(pg,j,p))}{ex-Jugadores(pg)}
+\tadAxioma{ex-Jugadores(agPokemon(pg,poke,a))}{ex-Jugadores(pg) }
+\tadAxioma{ex-Jugadores(Conectarse(pg,j, p))}{ex-Jugadores(pg)}
+\tadAxioma{ex-Jugadores(Desconectarse(pg, j))}{ex-Jugadores(pg)}
+\tadAxioma{ex-Jugadores(Moverse(pg, j, p))}{{\IF (sanciones(pg, j) == 4 $\land$ ((distancia(posicionActual(pg,j), p) $\geq$ 10) $\lor$  ( p $\notin$ caminos(mapa(pg), posicionActual(pg,j))))) THEN Ag(j, ex-Jugadores(pg)) ELSE ex-Jugadores(pg) FI }}
+
+\vskip12pt
+
+
+
 %OB mapa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tadAxioma{mapa(NvoJuego(m))}{m}
 \tadAxioma{mapa(agJugador(pg,j,p))}{  mapa(pg) }
-\tadAxioma{mapa(agPokemon(pg, p, a ))}{mapa(pg)}
+\tadAxioma{mapa(agPokemon(pg, poke, a ))}{mapa(pg)}
 \tadAxioma{mapa(Conectarse(pg,j, p))}{ mapa(pg)}
 \tadAxioma{mapa(Desconectarse(pg, j))}{mapa(pg)}
 \tadAxioma{mapa(Moverse(pg, j, p))}{mapa(pg)}
@@ -273,10 +310,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tadAxioma{pokesalvajes(NvoJuego(m))}{\textbf{vacio}}
 \tadAxioma{pokesalvajes(agJugador(pg,j,p))}{  pokesalvejes(pg) }%%puede crear opciones de captura
-\tadAxioma{pokesalvajes(agPokemon(pg, p, a ))}{\IF $\neg$ \ def?(p,pokesalvajes(pg)) THEN definir(pokesalvajes(pg), p, {a}) ELSE definir(pokesalvajes(pg), p, Ag(a,obtener(pokesalvages(pg), p))) FI}
+\tadAxioma{pokesalvajes(agPokemon(pg, poke, a ))}{\IF $\neg$ \ def?(poke,pokesalvajes(pg)) THEN definir(poke, a, pokesalvajes(pg)) ELSE definir(p, Ag(a,obtener(p, pokesalvages(pg))), pokesalvajes(pg)) FI}
 \tadAxioma{pokesalvajes(Conectarse(pg,j, p))}{ pokesalvejes(pg)}%puede crear opciones de captura
 \tadAxioma{pokesalvajes(Desconectarse(pg, j))}{pokesalvejes(pg)}%puede crear opciones de captura
-\tadAxioma{pokesalvajes(Moverse(pg, j, p))}{\IF AlgunollegaADiez(significados(pokesalvaje(pg), pg, p)) THEN pokesalvaje(pg) - conjuntoPokeEnPos(lleganADiez(significados(pokesalvajes(pg)),pg, p))   ELSE pokesalvajes(pg)  FI}% crea opciones de captura
+\tadAxioma{pokesalvajes(Moverse(pg, j, p))}{\IF AlgunollegaADiez(significados(pokesalvaje(pg)), pg, p) THEN pokesalvaje(pg) - conjuntoPokeEnPos(lleganADiez(significados(pokesalvajes(pg)),pg, p))   ELSE pokesalvajes(pg)  FI}% crea opciones de captura
 
 \vskip12pt
 
@@ -284,21 +321,40 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \tadAxioma{posicionActual(agJugador(pg,j,p), j')}{ \IF j' == j THEN p ELSE posicionActual(pg, j') FI }
-\tadAxioma{posicionActual(agPokemon(pg, p, a ),j)}{posicionActual(pg,j)}
+\tadAxioma{posicionActual(agPokemon(pg, poke, a ),j)}{posicionActual(pg,j)}
 \tadAxioma{posicionActual(Conectarse(pg,j, p), j')}{\IF j' == j THEN p ELSE posicionActual(pg, j') FI}
 \tadAxioma{posicionActual(Desconectarse(pg, j), j')}{posicionActual(p,j') }%%Verr
 \tadAxioma{posicionActual(Moverse(pg, j, p).j')}{ \IF j' == j THEN p ELSE posicionActual(pg, j') FI}  %%Aca tengo dudas....porque al moverse puedfe ser que se expulse, me parece que no hay lio, pero no se....
 
 \vskip12pt
 
+
+
+%OB capturados
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tadAxioma{capturados(agJugador(pg,j,p), j')}{ \IF j' == j THEN \textbf{vacio} ELSE capturados(pg, j') FI }
+\tadAxioma{capturados(agPokemon(pg, poke, a ),j')}{ capturados(pg, j')}
+\tadAxioma{capturados(Conectarse(pg,j, p), j')}{\IF (j' == j) THEN capturados(pg, j') ELSE {\IF AlgunollegaADiez(significados(pokesalvaje(pg)), pg, p) $\land$ j' $==$ dameUno(jugEnRango(pg, lleganADiez(significados(pokesalvajes(pg)), pg, p), jugadoresConectados(pg), p)) THEN Ag(PokemonEnRango(p, lleganADiez(significados(pokesalvajes(pg)), pg, p), capturados(pg, j')))  ELSE capturados(pg, j')  FI} FI}
+\tadAxioma{capturados(Desconectarse(pg, j), j')}{ capturados(pg, j') }%%Verr
+\tadAxioma{capturados(Moverse(pg, j, p).j')}{ \IF j' == j THEN capturados(pg, j') ELSE {\IF AlgunollegaADiez(significados(pokesalvaje(pg)), pg, p) $\land$ j' $==$ dameUno(jugEnRango(pg, lleganADiez(significados(pokesalvajes(pg)), pg, p), jugadoresConectados(pg), p)) THEN Ag(PokemonEnRango(p, lleganADiez(significados(pokesalvajes(pg)), pg, p), capturados(pg, j')))  ELSE capturados(pg, j')  FI} FI} 
+
+
+\vskip12pt
+
+
+
+
+
+
 %OB sanciones
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \tadAxioma{sanciones(agJugador(pg,j,p), j')}{  \IF j' == j THEN 0 ELSE sanciones(pg, j') FI}
-\tadAxioma{sanciones(agPokemon(pg, p, a ),j )}{sanciones(pg, j)}
+\tadAxioma{sanciones(agPokemon(pg, poke, a ),j )}{sanciones(pg, j)}
 \tadAxioma{sanciones(Conectarse(pg,j, p), j')}{sanciones(pg, j')}
 \tadAxioma{sanciones(Desconectarse(pg, j), j')}{sanciones(pg, j')}
-\tadAxioma{sanciones(Moverse(pg, j, p),j')}{\IF (j' == j) $\land$ distancia (posicionActual(pg,j), p) $\geq$ 10  THEN 1 + sanciones(pg,j')  ELSE sanciones(pg, j') FI}
+\tadAxioma{sanciones(Moverse(pg, j, p),j')}{\IF ((j' == j) $\land$ ((distancia(posicionActual(pg,j), p) $\geq$ 10) $\lor$  ( p $\notin$ caminos(mapa(pg), posicionActual(pg,j))))) THEN 1 + sanciones(pg,j')  ELSE sanciones(pg, j') FI}
 
 \vskip12pt
 
@@ -307,13 +363,13 @@
 
 %oo jugadores
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tadAxioma{jugadores(pg)}{jugConectados(pg) \ \cup \ jugDesconectados(pg) }
+\tadAxioma{jugadores(pg)}{jugConectados(pg) \ $\cup$ \ jugDesconectados(pg) }
 \vskip12pt
 
 %oo haypokemon
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tadAxioma{haypokemon(pg,p)}{existeUnPoke(pokesalvajes(pg),claves(pokesalvajes(pg)),p)}
-\tadAxioma{existeUnPoke(d,c,p)}{\IF vacio?(c) THEN \textbf{false} ELSE {\IF p $\in$ obtener(d,dameUno(c)) THEN \textbf{true} ELSE existeUnPoke(d, sinUno(c),p) FI} FI}
+\tadAxioma{existeUnPoke(d,c,p)}{\IF vacio?(c) THEN \textbf{false} ELSE {\IF p $\in$ obtener(dameUno(c), d) THEN \textbf{true} ELSE existeUnPoke(d, sinUno(c),p) FI} FI}
 \vskip12pt
 
 %oo pokemonenpos
@@ -323,25 +379,98 @@
 
 %oo pokemonenposaux
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tadAxioma{pokeenposaux(pg, claves, p)}{ \IF p $\in$ obtener(pokesalvaje(pg),dameUno(claves)) THEN p ELSE pokeenposaux(pg, sinUno(claves), p) )FI} %debido a que nos aseguramos que este antes de usarlo no se indefine.
+\tadAxioma{pokeenposaux(pg, claves, p)}{\IF (vacio?(claves)) THEN false ELSE {\IF p $\in$ obtener(dameUno(claves), pokesalvaje(pg)) THEN p ELSE pokeenposaux(pg, sinUno(claves), p) )FI} FI} %debido a que nos aseguramos que este antes de usarlo no se indefine.
 \vskip12pt
 
 
 
 %oo algunoLlegaADiez
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tadAxioma{algunoLlegaADiez(cpos,pg,p)}{\IF vacio(cpos) THEN false ELSE {\IF( contadorpos(pg, dameUno(cpos)) == 9 $\land$ distancia(p, dameUno(cpos) $>$ 2)) THEN true ELSE algunoLlegaADiez(sinUno(cpos), pg, p)  FI} FI}
+\tadAxioma{algunoLlegaADiez(cpos,pg,p)}{\IF vacio?(cpos) THEN false ELSE {\IF( contadorpos(pg, dameUno(cpos)) == 9 $\land$ distancia(p, dameUno(cpos) $>$ 2)) THEN true ELSE algunoLlegaADiez(sinUno(cpos), pg, p)  FI} FI}
 \vskip12pt
 
 %oo LleganADiez
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tadAxioma{LleganADiez(cpos,pg,p)}{\IF vacio(cpos) THEN \textbf{vacio} ELSE {\IF( contadorpos(pg, dameUno(cpos)) == 9 $\land$ distancia(p, dameUno(cpos) $>$ 2)) THEN Ag(dameUno(cpos), LleganADiez(sinUno(cpos), pg, p) ELSE LleganADiez(sinUno(cpos), pg, p)  FI} FI}
+\tadAxioma{LleganADiez(cpos,pg,p)}{\IF vacio?(cpos) THEN \textbf{vacio} ELSE {\IF( contadorpos(pg, dameUno(cpos)) == 9 $\land$ distancia(p, dameUno(cpos) $>$ 2)) THEN Ag(dameUno(cpos), LleganADiez(sinUno(cpos), pg, p)) ELSE LleganADiez(sinUno(cpos), pg, p)  FI} FI}
 \vskip12pt
 
 
 
 %oo conjuntoPokeEnPos
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tadAxioma{conjuntoPokeEnPos(cpos, pg)}{\IF vacio(cpos) THEN $ \textbf{vacio}$ ELSE Ag(pokemonenpos(pg, dameUno(cpos))  $\cup$ conjuntoPokeEnPos(pg, sinUno(cpos) )) FI}
+\tadAxioma{conjuntoPokeEnPos(cpos, pg)}{\IF vacio?(cpos) THEN $ \textbf{vacio}$ ELSE Ag(pokemonenpos(pg, dameUno(cpos))  $\cup$ conjuntoPokeEnPos(pg, sinUno(cpos) )) FI}
+
+
+
+
+%OO jugEnRango
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\tadAxioma{jugEnRango(pg, cpos, cjug,  p)}{\IF DistanciaDeCaptura(p, cpos) ==\textbf{vacio}  THEN \textbf{vacio} ELSE  jugCapturadores(pg, cpos, cjug, dameUno(DistanciaDeCaptura(p, cpos))) FI}
+\vskip12pt
+%OO DistanciaDeCaptura
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tadAxioma{DistanciaDeCaptura(p, cpos)}{\IF vacio?(cpos)  THEN \textbf{vacio} ELSE {\IF  distancia(p, dameUno(cpos))$\leq$ 2 THEN Ag(dameUno(cpos), DistanciaDeCaptura(p, sinUno(cpos))) ELSE DistanciaDeCaptura(p, sinUno(cpos))    FI}  FI}
+
+%Aclaracion, debido a que no puede haber dos pokemon a menos de distancia 5, este conjunto va a teren 1 elemento
+\vskip12pt
+%OO jugCapturadores
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tadAxioma{jugCapturadores(pg, cjug, p)}{\IF vacio?(cjug)  THEN \textbf{vacio} ELSE {\IF  distancia(p, posicionActual(dameUno(cjug), pg))$\leq$ 2 THEN Ag(dameUno(cjug), jugCapturadores(pg, sinUno(cjug), p)) ELSE jugCapturadores(pg, sinUno(cjug), p)    FI}  FI}
+\vskip12pt
+
+%OO PokemonEnRango
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\tadAxioma{PokemonEnRango(p, cpos, pg)}{\IF  distancia(p, dameUno(cpos))$\leq$ 2 THEN buscarPoke(claves(pokesalvajes(pg)),pokesalvajes(pg), dameUno(cpos)) ELSE PokemonEnRango(p, sinUno(cpos), pg)    FI} 
+\vskip12pt
+%OO buscarPoke
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{buscarPoke(cpok, dicc, p)}{\IF p $\in$ obtener(dameUno(cpok), dicc) THEN dameUno(cpok) ELSE buscarPoke(sinUno(cpok), dicc, p)    FI} 
+\vskip12pt
+%OO significados
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{significados(dicc)}{ significadosAux(dicc, claves(dicc))}
+\vskip12pt
+%OO significadosaux
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{significadosaux(dicc, cla)}{ \IF vacio?(cla) THEN \textbf{vacio} ELSE obtener(dameUno(cla), dicc) $\cup$ significadoaux(dicc,sinUno(cla)) FI}
+\vskip12pt
+%OO IndiceDeRareza
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{IndiceDeRareza(pg, poke)}{ 100 - (div(PokemonsDelTipo(pg, poke)x100, PokeTotal(pg)))}
+\vskip12pt 
+%OO PokemonsDelTipo
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{PokemonsDelTipo(pg, poke)}{$\#$(obtener(poke, pokesalvajes(pg))) + PokeDelTipoAux(pg, jugadores(pg), poke)}
+\vskip12pt
+%OO PokeDelTipoAux
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{PokeDelTipoAux(pg, cj, poke)}{\IF \textbf{vacio(cj)} THEN 0 ELSE {\IF poke $\in$ capturados(pg, dameUno(cj)) THEN PokemonsJug(capturados(pg, dameUno(cj)), poke) + PokeDelTipoAux(pg, sinUno(cj), poke) ELSE PokeDelTipoAux(pg, sinUno(cj), poke)   FI} FI}
+\vskip12pt
+%OO PokemonsJug
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{PokemonsJug(mcp, poke)}{\IF \textbf{vacio(mcp)} THEN 0 ELSE { \IF (poke == dameUno(mcp)) THEN 1 + PokemonsJug(sinUno(mcp), poke) ELSE PokemonsJug(sinUno(mcp), poke)  FI} FI}
+\vskip12pt
+%OO PokeTotal
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{PokeTotal(pg)}{CantPokeSalvajes(pg, claves(pokesalvajes(pg))) + CantCapturados(pg, jugadores(pg))}
+\vskip12pt
+%OO CantPokeSalvajes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{CantPokeSalvajes(pg, cpok)}{\IF \textbf{vacio?(cpok)} THEN 0 ELSE $\#$(obtener(dameUno(cpok), pokesalvajes(pg))) + CantPokeSalvajes(pg, sinUno(cpok)) FI}
+\vskip12pt
+%OO CantCapturados
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{CantCapturados(pg, cj)}{\IF \textbf{vacio?(cj)} THEN 0 ELSE $\#$(capturados(pg, dameUno(cj))) + CantCapturados(pg, sinUno(cj)) FI}
+\vskip12pt
+
+
+
+
 
 \end{tad}
