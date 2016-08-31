@@ -160,11 +160,12 @@
 \begin{tad}{\tadNombre{PokemonGo}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tadIgualdadObservacional{pg}{pg'}{PokemonGo}{($\forall$ p:posicion)((p $\in$ posiciones(m)) == (p $\in$ posiciones(m'))) $\land$ ($\forall$ p:posicion)(p $\in$ posiciones(m)) $\impluego$ conectadas(m,p) == conectadas(m',p)}
+\tadIgualdadObservacional{pg}{pg'}{PokemonGo}{mapa(pg)==mapa(pg') $\yluego$
+($\forall$ p $\in$ posiciones(mapa(pg)))(contadorPos(pg, p)==contadorPos(pg',p)) $\yluego$ pokesalvajes(pg)==pokesalvajes(pg') $\land$ ($\forall$ j $\in$ jugConectados(pg))(j $\in$ jugConectados(pg')) $\land$  ($\forall$ j $\in$ jugDesconectados(pg))(j $\in$ jugDesconectados(pg')) $\land$ ($\forall$ j $\in$ ex-Jugadores(pg))(j $\in$ ex-Jugadores(pg')) $\land$($\forall$ j $\in$ jugConectados(pg))( posicion actual(pg,j) == posicion actual(pg, j') $\land$ ($\forall$ j $\in$ jugConectados(pg) $\cup$ jugDesconectados(pg))(sanciones(pg,j)==sanciones(pg',j)  $\land$  capturados(pg,j)==capturados(pg',j))}
 
 \tadGeneros{pokemonGO}
 \tadExporta{pokemoGO, generadores, observadores, otras operaciones}
-\tadUsa{\tadNombre{Posicion}, \tadNombre{Bool}, \tadNombre{Nat}, \tadNombre{conj},\tadNombre{Multiconj}, \tadNombre{dicc} }
+\tadUsa{\tadNombre{Posicion}, \tadNombre{Bool}, \tadNombre{Nat}, \tadNombre{conj},\tadNombre{Multiconj}, \tadNombre{dicc} \tadNombre{Mapa}}
 
 
 %Observadores
@@ -238,6 +239,8 @@
 \tadOperacion{significados}{dicc($\alpha$, $\beta$)/dicc}{multiconj($\betha$)}{}
 \tadOperacion{significadosaux}{dicc($\alpha$, $\beta$)/dicc, conj($\alpha$)/cla}{multiconj($\betha$)}{}
 % no se si deberia ser multiconjunto.
+\tadOperacion{SacarDeDic}{dicc(pokemon, conj(posicion))/dicc, conjunto(posicion)cpos}{dicc(pokemon,conjunto(posicion))}{cpos $\subseteq$ significados(dicc)}
+\tadOperacion{Redefinir}{dicc(pokemon, conj(posicion))/dicc, conjunto(pokemon)cpoke, conjunto(posicion)/cpos}{dicc(pokemon,cojunto(posicion))}{}
 \tadOperacion{PokemonsDelTipo}{pokemonGO/pg, pokemon/poke}{nat}{}
 \tadOperacion{PokeDelTipoAux}{pokemonGO/pg, conj(jugador)/cj, pokemon/poke}{nat}{}
 \tadOperacion{PokemonsJug}{multiconj(pokemon)/mcp, pokemon/poke}{nat}{}
@@ -313,7 +316,7 @@
 \tadAxioma{pokesalvajes(agPokemon(pg, poke, a ))}{\IF $\neg$ \ def?(poke,pokesalvajes(pg)) THEN definir(poke, a, pokesalvajes(pg)) ELSE definir(p, Ag(a,obtener(p, pokesalvages(pg))), pokesalvajes(pg)) FI}
 \tadAxioma{pokesalvajes(Conectarse(pg,j, p))}{ pokesalvejes(pg)}%puede crear opciones de captura
 \tadAxioma{pokesalvajes(Desconectarse(pg, j))}{pokesalvejes(pg)}%puede crear opciones de captura
-\tadAxioma{pokesalvajes(Moverse(pg, j, p))}{\IF AlgunollegaADiez(significados(pokesalvaje(pg)), pg, p) THEN pokesalvaje(pg) - conjuntoPokeEnPos(lleganADiez(significados(pokesalvajes(pg)),pg, p))   ELSE pokesalvajes(pg)  FI}% crea opciones de captura
+\tadAxioma{pokesalvajes(Moverse(pg, j, p))}{\IF AlgunollegaADiez(significados(pokesalvaje(pg)), pg, p) THEN SacarDeDic(pokesalvaje(pg), lleganADiez(significados(pokesalvajes(pg)),pg, p))   ELSE pokesalvajes(pg)  FI}% crea opciones de captura
 
 \vskip12pt
 
@@ -345,8 +348,6 @@
 
 
 
-
-
 %OB sanciones
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -357,6 +358,21 @@
 \tadAxioma{sanciones(Moverse(pg, j, p),j')}{\IF ((j' == j) $\land$ ((distancia(posicionActual(pg,j), p) $\geq$ 10) $\lor$  ( p $\notin$ caminos(mapa(pg), posicionActual(pg,j))))) THEN 1 + sanciones(pg,j')  ELSE sanciones(pg, j') FI}
 
 \vskip12pt
+
+
+%OB contadorPos
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tadAxioma{contadorPos(NvoJuego(m),p')}{0}
+\tadAxioma{contadorPos(agJugador(pg,j,p), p')}{contadorPos(pg,p')}
+\tadAxioma{contadorPos(agPokemon(pg, p, a ), p')}{\IF (p==p') THEN 0 ELSE contadorPos(pg,p') FI}
+\tadAxioma{contadorPos(Conectarse(pg,j, p), p' )}{\IF distancia(p,p')$\>$2 THEN{\IF contadorPos(pg,p')$\<$ 9 THEN contadorPos(pg, p') + 1 ELSE 0 FI} ELSE contadorPos(pg,p') FI}
+\tadAxioma{contadorPos(Desconectarse(pg, j), p' )}{ contadorPos(pg,p')}
+\tadAxioma{contadorPos(Moverse(pg, j, p), p')}{\IF distancia(p,p') > 2 THEN{\IF contadorPos(pg,p') < 9 THEN contadorPos(pg, p') + 1 ELSE 0 FI} ELSE{\IF distancia(posicionActual(pg,j), p') > 2 THEN 0  ELSE contadorPos(pg,p') FI} FI}
+
+\vskip12pt
+
+
 
 %oo otras op
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -440,6 +456,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tadAxioma{significadosaux(dicc, cla)}{ \IF vacio?(cla) THEN \textbf{vacio} ELSE obtener(dameUno(cla), dicc) $\cup$ significadoaux(dicc,sinUno(cla)) FI}
 \vskip12pt
+
+%OO sacarDeDicc
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{sacarDeDicc(dicc, cpos)}{ \IF vacio?(cpos) THEN dicc ELSE  Redefinir(sacarDeDicc(dicc, sinUno(cpos)), buscarPoke(claves(dicc), dicc, dameUno(cpos)), obtener(buscarPoke(claves(dicc), dicc, dameUno(pos)), dicc)-dameUno(cpos)) FI}
+\vskip12pt
+
+
+%OO Redefinir
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tadAxioma{redefinir(dicc, cla, cpos)}{ \IF $\not$ definida(dicc, cla) THEN definir(dicc, cla,cpos) ELSE definir(borrar(dicc, cla), cla, cpos) FI}
+\vskip12pt
+
+
 %OO IndiceDeRareza
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tadAxioma{IndiceDeRareza(pg, poke)}{ 100 - (div(PokemonsDelTipo(pg, poke)x100, PokeTotal(pg)))}
@@ -450,11 +479,11 @@
 \vskip12pt
 %OO PokeDelTipoAux
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tadAxioma{PokeDelTipoAux(pg, cj, poke)}{\IF \textbf{vacio(cj)} THEN 0 ELSE {\IF poke $\in$ capturados(pg, dameUno(cj)) THEN PokemonsJug(capturados(pg, dameUno(cj)), poke) + PokeDelTipoAux(pg, sinUno(cj), poke) ELSE PokeDelTipoAux(pg, sinUno(cj), poke)   FI} FI}
+\tadAxioma{PokeDelTipoAux(pg, cj, poke)}{\IF \textbf{vacio?(cj)} THEN 0 ELSE {\IF poke $\in$ capturados(pg, dameUno(cj)) THEN PokemonsJug(capturados(pg, dameUno(cj)), poke) + PokeDelTipoAux(pg, sinUno(cj), poke) ELSE PokeDelTipoAux(pg, sinUno(cj), poke)   FI} FI}
 \vskip12pt
 %OO PokemonsJug
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tadAxioma{PokemonsJug(mcp, poke)}{\IF \textbf{vacio(mcp)} THEN 0 ELSE { \IF (poke == dameUno(mcp)) THEN 1 + PokemonsJug(sinUno(mcp), poke) ELSE PokemonsJug(sinUno(mcp), poke)  FI} FI}
+\tadAxioma{PokemonsJug(mcp, poke)}{\IF \textbf{vacio?(mcp)} THEN 0 ELSE { \IF (poke == dameUno(mcp)) THEN 1 + PokemonsJug(sinUno(mcp), poke) ELSE PokemonsJug(sinUno(mcp), poke)  FI} FI}
 \vskip12pt
 %OO PokeTotal
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
