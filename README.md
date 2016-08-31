@@ -78,7 +78,7 @@
 \section{TAD \tadNombre{Mapa}}
 
 \begin{tad}{\tadNombre{Mapa}}
-\tadIgualdadObservacional{m}{m'}{mapa}{($\forall$ p:posicion)((p $\in$ posiciones(m)) == (p $\in$ posiciones(m'))) $\land$ ($\forall$ p:posicion)((p $\in$ posiciones(m)) $\impluego$ conectadas(m,p) == conectadas(m',p))}
+\tadIgualdadObservacional{m}{m'}{mapa}{($\forall$ p:posicion)((p $\in$ posiciones(m)) == (p $\in$ posiciones(m'))) $\land_{L}$ conectadas(m,p) == conectadas(m',p))}
 
 \tadGeneros{mapa}
 \tadExporta{mapa, generadores, observadores, otras operaciones}
@@ -161,7 +161,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tadIgualdadObservacional{pg}{pg'}{PokemonGo}{mapa(pg)==mapa(pg') $\yluego$
-($\forall$ p $\in$ posiciones(mapa(pg)))(contadorPos(pg, p)==contadorPos(pg',p)) $\yluego$ pokesalvajes(pg)==pokesalvajes(pg') $\land$ ($\forall$ j $\in$ jugConectados(pg))(j $\in$ jugConectados(pg')) $\land$  ($\forall$ j $\in$ jugDesconectados(pg))(j $\in$ jugDesconectados(pg')) $\land$ ($\forall$ j $\in$ ex-Jugadores(pg))(j $\in$ ex-Jugadores(pg')) $\land$($\forall$ j $\in$ jugConectados(pg))( posicion actual(pg,j) == posicion actual(pg, j') $\land$ ($\forall$ j $\in$ jugConectados(pg) $\cup$ jugDesconectados(pg))(sanciones(pg,j)==sanciones(pg',j)  $\land$  capturados(pg,j)==capturados(pg',j))}
+($\forall$ p: conj(posicion)))p $\in$ posiciones(mapa(pg) $\land$ (contadorPos(pg, p)==contadorPos(pg',p)) $\yluego$ pokesalvajes(pg)==pokesalvajes(pg') $\land$ ($\forall$ j: Jugador )j $\in$ jugConectados(pg) == j $\in$ jugConectados(pg') $\land$  ($\forall$ j: Jugador) j $\in$ jugDesconectados(pg)) == (j $\in$ jugDesconectados(pg')) $\land$ ($\forall$ j $\in$ Jugador) ex-Jugadores(pg) == j $\in$ ex-Jugadores(pg') $\land$($\forall$ j: Jugador) $\in$ jugConectados(pg) $\land{L}$ ( posicion actual(pg,j) == posicion actual(pg, j') $\land$ ($\forall$ j: Jugador) j $\in$ jugConectados(pg) $\cup$ jugDesconectados(pg) $\land{L}$ (sanciones(pg,j)==sanciones(pg',j)  $\land$  capturados(pg,j)==capturados(pg',j))}
 
 \tadGeneros{pokemonGO}
 \tadExporta{pokemoGO, generadores, observadores, otras operaciones}
